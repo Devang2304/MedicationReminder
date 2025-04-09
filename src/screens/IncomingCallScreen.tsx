@@ -25,7 +25,7 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
 
     useEffect(() => {
         Sound.setCategory('Playback');
-        const ring = new Sound('ringtone.mp3', Sound.MAIN_BUNDLE, (error) => {
+        const ring = new Sound('../assets/chicken_dance_v2.mp3', Sound.MAIN_BUNDLE, (error) => {
             if(error){
                 console.log('Failed to load the ringtone', error);
                 return;
@@ -39,7 +39,7 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
         const PATTERN = [1000, 2000, 1000];
         Vibration.vibrate(PATTERN, true);
 
-        const message = new Sound('voice_message.mp3',Sound.MAIN_BUNDLE, (error) => {
+        const message = new Sound('../assets/voice_message.mp3',Sound.MAIN_BUNDLE, (error) => {
             if(error){
                 console.log('Failed to load the voice message', error);
                 return;
@@ -49,14 +49,14 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
 
         const timer = setInterval(() => {
             setCallTimer(prev => {
-                if(prev >= 40 ) {
+                if(prev >= 60 ) {
                     if(ringtone){
                         ringtone.stop();
                         setSoundPlaying(false);
                     }
                     Vibration.cancel();
                     navigation.goBack();
-                    return 40;
+                    return 60;
                 }
                 return prev + 1;
             });
@@ -116,7 +116,7 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.container}>
           <View style={styles.callerInfo}>
             <Image
-              source={require('../../assets/medicine-icon.png')}
+              source={require('../assets/medicine-icon.png')}
               style={styles.callerImage}
             />
             <Text style={styles.callerName}>Medication Reminder</Text>
