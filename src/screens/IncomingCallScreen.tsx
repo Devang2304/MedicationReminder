@@ -18,7 +18,7 @@ type Props = {
 
 const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
     const [callTimer, setCallTimer] = useState<number>(0);
-    const [soundPlaying,setSoundPlaying] = useState<boolean>(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [soundPlaying,setSoundPlaying] = useState<boolean>(false);
     const [ringtone, setRingtone] = useState<Sound | null>(null);
     const [voiceMessage, setVoiceMessage] = useState<Sound | null>(null);
@@ -50,7 +50,12 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
         const timer = setInterval(() => {
             setCallTimer(prev => {
                 if(prev >= 40 ) {
-                    handleDecline();
+                    if(ringtone){
+                        ringtone.stop();
+                        setSoundPlaying(false);
+                    }
+                    Vibration.cancel();
+                    navigation.goBack();
                     return 40;
                 }
                 return prev + 1;
@@ -59,11 +64,11 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
 
         return () => {
             clearInterval(timer);
-            if(ringtone) ringtone.release();
-            if(voiceMessage) voiceMessage.release();
+            if(ringtone) {ringtone.release();}
+            if(voiceMessage) {voiceMessage.release();}
             Vibration.cancel();
         };
-    },[]);
+    },[ringtone, voiceMessage, navigation]);
 
     const handleAnswer  = async (): Promise<void> => {
         if(ringtone){
@@ -96,5 +101,101 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
         Vibration.cancel();
         navigation.goBack();
     };
-};
+
+
+    const recordMedicationTaken = async () : Promise<void> => {
+        try {
+            const currentTime = Date.now();
+            await AsyncStorage.setItem('lastTakenDate', currentTime.toString());
+        } catch (error) {
+            console.error('failed to save medication timestamp',error);
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+          <View style={styles.callerInfo}>
+            <Image
+              source={require('../../assets/medicine-icon.png')}
+              style={styles.callerImage}
+            />
+            <Text style={styles.callerName}>Medication Reminder</Text>
+            <Text style={styles.callStatus}>Incoming call...</Text>
+            <Text style={styles.callTimer}>{callTimer}s</Text>
+          </View>
+
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity style={styles.declineButton} onPress={handleDecline}>
+              <Text style={styles.buttonText}>Decline</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.answerButton} onPress={handleAnswer}>
+              <Text style={styles.buttonText}>Answer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    };
+
+    const styles = StyleSheet.create({
+      container: {
+        flex: 1,
+        backgroundColor: '#121212',
+        justifyContent: 'space-between',
+        padding: 20,
+      },
+      callerInfo: {
+        alignItems: 'center',
+        marginTop: 60,
+      },
+      callerImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 20,
+        backgroundColor: '#333',
+      },
+      callerName: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: 8,
+      },
+      callStatus: {
+        fontSize: 16,
+        color: '#bbb',
+        marginBottom: 16,
+      },
+      callTimer: {
+        fontSize: 14,
+        color: '#999',
+      },
+      actionsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginBottom: 40,
+      },
+      declineButton: {
+        backgroundColor: '#FF3B30',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      answerButton: {
+        backgroundColor: '#34C759',
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+      },
+    });
+
+export default IncomingCallScreen;
 
