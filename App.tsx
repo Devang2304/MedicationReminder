@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './src/screens/HomeScreen';
 import IncomingCallScreen from './src/screens/IncomingCallScreen';
 import notifee, { TriggerType, AndroidImportance, TimestampTrigger } from '@notifee/react-native';
+import 'react-native-gesture-handler';
 
 
 type RootStackParamList = {

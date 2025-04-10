@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Vibration } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Vibration } from 'react-native';
 import Sound from 'react-native-sound';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -24,28 +24,41 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
     const [voiceMessage, setVoiceMessage] = useState<Sound | null>(null);
 
     useEffect(() => {
+      try {
         Sound.setCategory('Playback');
-        const ring = new Sound('../assets/chicken_dance_v2.mp3', Sound.MAIN_BUNDLE, (error) => {
-            if(error){
+        // Modify this part
+        const ring = new Sound('chickendance.mp3','', (error) => {
+            if (error) {
                 console.log('Failed to load the ringtone', error);
                 return;
             }
+            // Only start playing and set state when sound is loaded successfully
             ring.setNumberOfLoops(-1);
-            setRingtone(ring);
             ring.play();
             setSoundPlaying(true);
         });
+        setRingtone(ring);
+     } catch (error){
+         console.log('Failed to load the ringtone', error);
+         return;
+     }
 
         const PATTERN = [1000, 2000, 1000];
         Vibration.vibrate(PATTERN, true);
 
-        const message = new Sound('../assets/voice_message.mp3',Sound.MAIN_BUNDLE, (error) => {
-            if(error){
+
+        try {
+          const message = new Sound('voicemessage.mp3', '', (error) => {
+            if (error) {
                 console.log('Failed to load the voice message', error);
                 return;
             }
-            setVoiceMessage(message);
-        });
+          });
+          setVoiceMessage(message);
+        } catch (error) {
+          console.log('Failed to load the voice message', error);
+          return;
+        }
 
         const timer = setInterval(() => {
             setCallTimer(prev => {
@@ -115,10 +128,6 @@ const IncomingCallScreen: React.FC<Props> = ({ navigation }) => {
     return (
         <View style={styles.container}>
           <View style={styles.callerInfo}>
-            <Image
-              source={require('../assets/medicine-icon.png')}
-              style={styles.callerImage}
-            />
             <Text style={styles.callerName}>Medication Reminder</Text>
             <Text style={styles.callStatus}>Incoming call...</Text>
             <Text style={styles.callTimer}>{callTimer}s</Text>
